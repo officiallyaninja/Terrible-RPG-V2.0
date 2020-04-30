@@ -1,0 +1,7 @@
+1. add in moves
+2. add in status conditions
+3. make the actual fighting loop
+4. figure out how to best randomly generate encounters
+4. add items and weapons etc
+5. add a shop
+6. separate the game into more files, maybe one for each class
