@@ -43,7 +43,7 @@ class Character():
             print(colored(health_bar, self.color).ljust(20))
         else:
             print(self.name.rjust(20))
-            print(colored(health_bar, self.color).rjust(60))
+            print(colored(health_bar, self.color).rjust(62))
 
 #        print(self.name.ljust(20)) if self is player else print(self.name.rjust(20))
 #        print(colored(health_bar, self.color))
