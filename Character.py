@@ -36,7 +36,7 @@ class Character():
         # also gives a precise numeric display, in case the player needs it
         health_bar += f'] {self.hp}/{self.maxhp}'
         # health is set to be red in colour for the player, and white for enemies
-        # this is to make it easy to distinguish a see
+        # this is to make it easy to distinguish and see
         print(self.name)
         print(colored(health_bar, self.color))
 

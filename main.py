@@ -21,6 +21,8 @@ while len(p.opponents) > 0:
     show_fight_status(p)
     p.show_fight_options()
     choice = p.get_fight_option()
+    os.system('cls')
     p.do_fight_option(choice)
-
+    input('press enter to continue: ')
+    os.system('cls')
 print('hurray you won')
