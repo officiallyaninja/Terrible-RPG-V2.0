@@ -9,7 +9,7 @@ def show_opponents(opponent_list):
 
 
 class Move():
-    def __init__(self, name, flavor_text, base_dmg, AoE, status_effect, accuracy):
+    def __init__(self, name, base_dmg, AoE, status_effect, accuracy, flavor_text=''):
         self.name = name
         self.flavor_text = flavor_text
         self.base_dmg = base_dmg
@@ -92,16 +92,32 @@ strike = Move(
     status_effect=None,
     accuracy=95)
 
+weak_strike = Move(
+    name='weak strike',
+    flavor_text='a simple strike',
+    base_dmg=5,
+    AoE=False,
+    status_effect=None,
+    accuracy=100)
+
+strong_strike = Move(
+    name='strong strike',
+    flavor_text='a strong strike, very prone to missing',
+    base_dmg=20,
+    AoE=False,
+    status_effect=None,
+    accuracy=60)
+
 flame_blast = Move(
     name='flame blast',
     flavor_text='cast a blast of flames to burn your opponents',
-    base_dmg=5,
+    base_dmg=10,
     AoE=True,
     status_effect=None,  # should be burning here
-    accuracy=95)
+    accuracy=75)
 
 starting_moveset = {
-    'Player': [strike, flame_blast, strike],
-    'Gremlin': [strike],
-    'Bat': [strike]
+    'Player': [strike, strong_strike, flame_blast],
+    'Gremlin': [weak_strike],
+    'Bat': [weak_strike]
 }

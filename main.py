@@ -27,5 +27,6 @@ while len(p.opponents) > 0:
     os.system('cls')
     for enemy in p.opponents:
         enemy.attack(p)
-    input('press enter to continue: ')
+        input('press enter to continue: ')
+        os.system('cls')
 print('hurray you won')
