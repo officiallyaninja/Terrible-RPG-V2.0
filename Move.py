@@ -28,7 +28,7 @@ class Move():
                     hit_chance = max(50, self.accuracy - enemy.evasion)
                     hit_roll = random.randint(0, 99)
                     if hit_roll > hit_chance:  # if this triggers its a miss
-                        print(f'{user.name} missed {enemy.name}')
+                        print(colored(f'{user.name} missed {enemy.name}', 'green',))
                         continue
                     dmg = dmg * random.uniform(0.9, 1.1)
                     user.deal_damage(enemy, dmg)
@@ -91,7 +91,7 @@ flame_blast = Move(
     accuracy=95)
 
 starting_moveset = {
-    'Player': [strike, flame_blast],
+    'Player': [strike, flame_blast, strike],
     'Gremlin': [],
     'Bat': []
 }

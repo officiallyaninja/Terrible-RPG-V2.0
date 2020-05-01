@@ -43,7 +43,8 @@ class Character():
     def deal_damage(self, other, dmg):  # code to make moves easily deal damage enemies and check if dead
         damage = int(dmg)
         other.hp -= damage
-        print(colored(f'{self.name} dealt {damage} damage to {other.name}', 'green', 'on_white'))
+        print(colored(f'{self.name} dealt {damage} damage to {other.name}',
+                      'green'), (colored('', 'white', 'on_grey')))
         if other.hp <= 0:
             other.dead = True
 

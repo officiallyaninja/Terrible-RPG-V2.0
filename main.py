@@ -1,6 +1,9 @@
 from Character import *
 from Move import *
+import os
 
+
+os.system('color')
 
 p = Player()
 
