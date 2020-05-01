@@ -9,7 +9,7 @@ p = Player()
 
 p.opponents.append(Gremlin())
 p.opponents.append(Bat())
-p.opponents.append(Bat())
+p.opponents.append(Slime())
 
 
 def show_fight_status(player):

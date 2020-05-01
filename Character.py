@@ -67,7 +67,8 @@ class Player(Character):
         for i in range(0, len(self.moveset)):
             move = self.moveset[i]
 
-            print(colored('A' + str(i), 'green'), end='', sep='')
+            # we have i+1 here, as we want indexing to start at 1
+            print(colored('A' + str(i + 1), 'green'), end='', sep='')
             print(f': {move.name} - {move.flavor_text}')
 
     def get_fight_option(self):  # get what option the player actually wants to do
@@ -84,7 +85,8 @@ class Player(Character):
                 continue
 
             try:
-                index = int(index)
+                index = int(index) - 1
+                # we have a -1 here, as the player input will be one more than the index, as list indexing starts at 0
             except ValueError:
                 print('ERROR: you should have a number after the first character')
                 continue
@@ -133,7 +135,7 @@ class Enemy(Character):
 class Gremlin(Enemy):
     def __init__(self):
         self.name = 'Gremlin'
-        self.base_maxhp = 80
+        self.base_maxhp = 50
         self.base_attack = 2
         self.evasion = 5
         super().__init__()
@@ -146,3 +148,37 @@ class Bat(Enemy):
         self.base_attack = 4
         self.evasion = 15
         super().__init__()
+
+
+class Slime(Enemy):
+    def __init__(self, has_split=False, maxhp=None, newly_born=False):
+        self.name = 'Slime'
+        self.base_maxhp = 80
+        self.base_attack = 2
+        self.evasion = 0
+        self.has_split = has_split
+        self.newly_born = newly_born
+        super().__init__()
+        if maxhp is None:
+            pass
+        else:
+            self.maxhp = maxhp
+            self.hp = maxhp
+            self.name = 'Small slime'
+
+    def attack(self, player):
+        if self.newly_born:
+            self.newly_born = False
+            print('the newly born slime wriggles around')
+            print("it appears as if it's too small to split again.")
+
+        elif self.hp > (self.maxhp / 2) or self.has_split:
+            super().attack(player)
+        else:
+            child1 = Slime(has_split=True, maxhp=self.hp, newly_born=True)
+            child2 = Slime(has_split=True, maxhp=self.hp, newly_born=True)
+            player.opponents.extend([child1, child2])
+            self.die(player.opponents)
+            print('The slime died and split into 2 smaller slimes!')
+            child1.show_healthbar()
+            child2.show_healthbar()
