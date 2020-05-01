@@ -4,7 +4,7 @@ from termcolor import colored
 
 def show_opponents(opponent_list):
     for i in range(0, len(opponent_list)):
-        print(colored(i, 'green'), ': ', end='', sep='')
+        print(colored(i, 'green').rjust(40), ': ', end='', sep='')
         opponent_list[i].show_healthbar()
 
 

@@ -37,8 +37,16 @@ class Character():
         health_bar += f'] {self.hp}/{self.maxhp}'
         # health is set to be red in colour for the player, and white for enemies
         # this is to make it easy to distinguish a see
-        print(self.name)
-        print(colored(health_bar, self.color))
+
+        if self.isPlayer:
+            print(self.name.ljust(20))
+            print(colored(health_bar, self.color).ljust(20))
+        else:
+            print(self.name.rjust(20))
+            print(colored(health_bar, self.color).rjust(60))
+
+#        print(self.name.ljust(20)) if self is player else print(self.name.rjust(20))
+#        print(colored(health_bar, self.color))
 
     def deal_damage(self, other, dmg):  # code to make moves easily deal damage enemies and check if dead
         damage = int(dmg)
