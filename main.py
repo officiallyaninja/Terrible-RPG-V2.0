@@ -1,6 +1,7 @@
 from Character import *
 from Move import *
 import os
+from time import sleep
 
 
 os.system('color')
@@ -18,6 +19,8 @@ def show_fight_status(player):
 
 
 while len(p.opponents) > 0:
+    sleep(1)
+    os.system("cls")
     show_fight_status(p)
     p.show_fight_options()
     choice = p.get_fight_option()

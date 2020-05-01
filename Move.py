@@ -39,7 +39,6 @@ class Move():
 
             # TODO: add status effect check here
             else:
-                show_opponents(opponents)
 
                 while True:
                     target_index = input('which enemy do you want to attack?: ')
@@ -72,7 +71,6 @@ class Move():
                 if enemy.dead:
                     enemy.die(opponents)
 
-            show_opponents(opponents)
         # TODO: make enemies attack too u idiot
 
 
