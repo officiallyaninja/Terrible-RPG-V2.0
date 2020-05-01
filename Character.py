@@ -74,6 +74,9 @@ class Player(Character):
         while True:  # error handling while loop
             # choice will be of form: A1,B1,A2,B2...A12,B12...
             choice = input('choose an attack or item: ')
+            if len(choice) < 2:
+                print('ERROR: you did not type anything')
+                continue
             type = choice[0].upper()  # A for (A)ttack, B for item from (B)ag
             index = choice[1:]
             if type not in ['A', 'B']:
@@ -120,6 +123,11 @@ class Enemy(Character):
         oppponents_list.pop(index)
         print(colored(f'{self.name} died', 'red'))
     # removes the enemy from the list of opponentsthe player has to face
+
+    def attack(self, player):
+        # the [0] is there because random.sample returns a list
+        move = random.sample(self.moveset, 1)[0]
+        move.use_move(self, player)
 
 
 class Gremlin(Enemy):

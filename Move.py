@@ -21,6 +21,7 @@ class Move():
     def use_move(self, user, opponents):  # opponents is the list of enemies the enemy has to fight
         # base damage of an attack for that character
         dmg = (((user.ATK) / 2) * (self.base_dmg))
+
         if user.isPlayer:  # checks if the user is the player or an enemy
             if self.AoE:  # checks if the move hits all enemies or just one Enemy
                 for enemy in opponents:
@@ -70,6 +71,15 @@ class Move():
 
             show_opponents(opponents)
         # TODO: make enemies attack too u idiot
+        else:  # this is for if the user of the attack is an enemy.
+            player = opponents  # sets 'player' as the enemy's opponent
+            hit_chance = max(50, self.accuracy - player.evasion)
+            hit_roll = random.randint(0, 99)
+            if hit_roll > hit_chance:  # this is a miss
+                print(colored(f'{user.name} missed {player.name}', 'green'))
+            else:
+                user.deal_damage(player, dmg)
+                player.show_healthbar()
 
 
 ALL_moves = []
@@ -92,6 +102,6 @@ flame_blast = Move(
 
 starting_moveset = {
     'Player': [strike, flame_blast, strike],
-    'Gremlin': [],
-    'Bat': []
+    'Gremlin': [strike],
+    'Bat': [strike]
 }
