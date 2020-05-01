@@ -11,9 +11,14 @@ p.opponents.append(Gremlin())
 p.opponents.append(Bat())
 p.opponents.append(Bat())
 
+
+def show_fight_status(player):
+    player.show_healthbar()
+    show_opponents(player.opponents)
+
+
 while len(p.opponents) > 0:
-    p.show_healthbar()
-    show_opponents(p.opponents)
+    show_fight_status(p)
     p.show_fight_options()
     choice = p.get_fight_option()
     p.do_fight_option(choice)
