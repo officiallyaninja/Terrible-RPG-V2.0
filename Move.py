@@ -4,8 +4,12 @@ from termcolor import colored
 
 def show_opponents(opponent_list):
     for i in range(0, len(opponent_list)):
-        print(colored(i, 'green').rjust(40), ': ', end='', sep='')
-        opponent_list[i].show_healthbar()
+        if i == 0:
+            print(colored(i, 'green').rjust(20), ': ', end='', sep='')
+            opponent_list[i].show_healthbar(x=1)
+        else:
+            print(colored(i, 'green').rjust(40), ': ', end='', sep='')
+            opponent_list[i].show_healthbar()
 
 
 class Move():

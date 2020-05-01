@@ -2,8 +2,12 @@ import random
 from termcolor import colored
 from Move import starting_moveset
 
+y = 1
+
 
 class Character():
+    global y
+
     def __init__(self):
         self.dead = False  # checks whether player or enemy is dead
         # TODO: add a way for characters to die
@@ -16,7 +20,7 @@ class Character():
     def get_health_percent(self):  # gives percent of health remaining as a float b/w 0 and 1
         return self.hp / self.maxhp
 
-    def show_healthbar(self):  # prints a healthbar
+    def show_healthbar(self, x=0):  # prints a healthbar
         health_bar = "["
         if self.hp != 0:
             # every 10 hit points corresponds to 1 'block' of health
@@ -39,11 +43,18 @@ class Character():
         # this is to make it easy to distinguish a see
 
         if self.isPlayer:
-            print(self.name.ljust(20))
-            print(colored(health_bar, self.color).ljust(20))
+            global y
+
+            print(self.name.ljust(20), end="")
+            y = colored(health_bar, self.color).ljust(0)
+
         else:
-            print(self.name.rjust(20))
-            print(colored(health_bar, self.color).rjust(62))
+            if x == 0:
+                print(self.name.rjust(20))
+                print(colored(health_bar, self.color).rjust(62))
+            if x == 1:
+                print(self.name.rjust(20))
+                print(y, colored(health_bar, self.color).rjust(40))
 
 #        print(self.name.ljust(20)) if self is player else print(self.name.rjust(20))
 #        print(colored(health_bar, self.color))
