@@ -72,8 +72,10 @@ class Move():
                 for enemy in opponents:
                     if enemy.hp <= 0:
                         enemy.dead = True
+                    '''
                     if enemy.dead:
                         enemy.die(opponents)
+                    '''
 
                 show_opponents(opponents)
             # TODO: make enemies attack too u idiot
@@ -120,7 +122,7 @@ flame_blast = Move(
     base_dmg=10,
     AoE=True,
     status_effect=None,  # should be burning here
-    accuracy=75)
+    accuracy=80)
 
 starting_moveset = {
     'Player': [strike, strong_strike, flame_blast],
