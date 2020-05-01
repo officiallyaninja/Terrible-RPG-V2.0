@@ -7,8 +7,9 @@ os.system('color')
 
 p = Player()
 
-p.opponents.append(Gremlin())
-p.opponents.append(Bat())
+# p.opponents.append(Gremlin())
+# p.opponents.append(Bat())
+p.opponents.append(Slime())
 p.opponents.append(Slime())
 
 
@@ -26,6 +27,9 @@ while len(p.opponents) > 0:
     input('press enter to continue: ')
     os.system('cls')
     for enemy in p.opponents:
+        # if enemy.newly_born:  # checks if the enemy was *just* created in current encounter
+        #    pass
+        # else:
         enemy.attack(p)
         input('press enter to continue: ')
         os.system('cls')

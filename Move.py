@@ -28,7 +28,7 @@ class Move():
                 if self.AoE:  # checks if the move hits all enemies or just one Enemy
                     for enemy in opponents:
                         # hit chance cant be less that 50%
-                        hit_chance = max(50, self.accuracy - enemy.evasion)
+                        hit_chance = self.accuracy - enemy.evasion
                         hit_roll = random.randint(0, 99)
                         if hit_roll > hit_chance:  # if this triggers its a miss
                             print(colored(f'{user.name} missed {enemy.name}', 'green',))
@@ -39,25 +39,26 @@ class Move():
                 # TODO: add status effect check here
                 else:
                     show_opponents(opponents)
+                    if len(opponents) > 1:
+                        while True:
+                            target_index = input('which enemy do you want to attack?: ')
+                            try:
+                                target_index = int(target_index)
+                            except ValueError:
+                                print('ERROR:input must be a number')
+                                continue
+                            try:
+                                target = opponents[target_index - 1]
+                                # we have a - 1 here, as indexing starts at 0 for the Player
+                                # the player types a number from 1 to {number of enemies}, not 0 to {number of enemies - 1}
+                                # but the opponents list indexing starts at 0
+                            except IndexError:
+                                print('ERROR: IndexError')
+                                continue
 
-                    while True:
-                        target_index = input('which enemy do you want to attack?: ')
-                        try:
-                            target_index = int(target_index)
-                        except ValueError:
-                            print('ERROR:input must be a number')
-                            continue
-                        try:
-                            target = opponents[target_index - 1]
-                            # we have a - 1 here, as indexing starts at 0 for the Player
-                            # the player types a number from 1 to {number of enemies}, not 0 to {number of enemies - 1}
-                            # but the opponents list indexing starts at 0
-                        except IndexError:
-                            print('ERROR: IndexError')
-                            continue
-
-                        break
-
+                            break
+                    else:
+                        target = opponents[0]
                     #    target = opponents[int(input('which enemy do you want to attack?: '))]
                     hit_chance = max(50, self.accuracy - target.evasion)
                     hit_roll = random.randint(0, 99)

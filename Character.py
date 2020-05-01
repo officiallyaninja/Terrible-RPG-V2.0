@@ -119,6 +119,7 @@ class Enemy(Character):
                          )  # some variance in max health
         self.hp = self.maxhp  # initially hp will be max hp
         self.ATK = self.base_attack + random.randint(-1, 1)  # slightly varies the attack power
+        self.newly_born = False
 
     def die(self, oppponents_list):  # opponents list is the list of all enemies the player has to face in the current encounter
         index = oppponents_list.index(self)
@@ -157,7 +158,6 @@ class Slime(Enemy):
         self.base_attack = 2
         self.evasion = 0
         self.has_split = has_split
-        self.newly_born = newly_born
         super().__init__()
         if maxhp is None:
             pass
@@ -165,6 +165,7 @@ class Slime(Enemy):
             self.maxhp = maxhp
             self.hp = maxhp
             self.name = 'Small slime'
+            self.newly_born = newly_born
 
     def attack(self, player):
         if self.newly_born:
@@ -175,8 +176,12 @@ class Slime(Enemy):
         elif self.hp > (self.maxhp / 2) or self.has_split:
             super().attack(player)
         else:
-            child1 = Slime(has_split=True, maxhp=self.hp, newly_born=True)
-            child2 = Slime(has_split=True, maxhp=self.hp, newly_born=True)
+            if player.opponents[-1] is self:
+                child1 = Slime(has_split=True, maxhp=self.hp, newly_born=False)
+                child2 = Slime(has_split=True, maxhp=self.hp, newly_born=True)
+            else:
+                child1 = Slime(has_split=True, maxhp=self.hp, newly_born=True)
+                child2 = Slime(has_split=True, maxhp=self.hp, newly_born=True)
             player.opponents.extend([child1, child2])
             self.die(player.opponents)
             print('The slime died and split into 2 smaller slimes!')
