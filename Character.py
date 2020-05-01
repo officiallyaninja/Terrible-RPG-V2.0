@@ -110,6 +110,10 @@ class Player(Character):
 class Enemy(Character):
     def __init__(self):
         super().__init__()
+        self.maxhp = int(self.base_maxhp * (random.uniform(0.8, 1.2))
+                         )  # some variance in max health
+        self.hp = self.maxhp  # initially hp will be max hp
+        self.ATK = self.base_attack + random.randint(-1, 1)  # slightly varies the attack power
 
     def die(self, oppponents_list):  # opponents list is the list of all enemies the player has to face in the current encounter
         index = oppponents_list.index(self)
@@ -121,26 +125,16 @@ class Enemy(Character):
 class Gremlin(Enemy):
     def __init__(self):
         self.name = 'Gremlin'
-        super().__init__()
         self.base_maxhp = 80
         self.base_attack = 2
         self.evasion = 5
-
-        self.maxhp = int(self.base_maxhp * (random.uniform(0.75, 1.2))
-                         )  # some variance in max health
-        self.hp = self.maxhp  # initially hp will be max hp
-        self.ATK = self.base_attack + random.randint(-1, 1)  # slightly varies the attack power
+        super().__init__()
 
 
 class Bat(Enemy):
     def __init__(self):
         self.name = 'Bat'
-        super().__init__()
         self.base_maxhp = 35
         self.base_attack = 4
         self.evasion = 15
-
-        self.maxhp = int(self.base_maxhp * (random.uniform(0.8, 1.2))
-                         )  # some variance in max health
-        self.hp = self.maxhp  # initially hp will be max hp
-        self.ATK = self.base_attack + random.randint(-1, 1)  # slightly varies the attack power
+        super().__init__()
