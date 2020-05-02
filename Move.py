@@ -1,5 +1,5 @@
 import random
-from termcolor import colored
+from termcolor import colored, cprint
 
 
 def show_opponents(opponent_list):
@@ -36,6 +36,7 @@ class Move():
                             print(colored(f'{user.name} missed {enemy.name}', 'green',))
                             continue
                         dmg = dmg * random.uniform(0.9, 1.1)
+                        cprint(f'{user.name} used {self.name} on {enemy.name}', 'green')
                         user.deal_damage(enemy, dmg)
 
                 # TODO: add status effect check here
@@ -68,6 +69,7 @@ class Move():
                         print(colored(f'{user.name} missed {target.name}', 'green'))
                         return None
                     dmg = dmg * random.uniform(0.9, 1.1)
+                    cprint(f'{user.name} used {self.name} on {target.name}', 'green')
                     user.deal_damage(target, dmg)
                     # TODO: add status effect check here
 
@@ -88,11 +90,23 @@ class Move():
                 if hit_roll > hit_chance:  # this is a miss
                     print(colored(f'{user.name} missed {player.name}', 'green'))
                 else:
+                    cprint(f'{user.name} used {self.name} on {player.name}', 'green')
                     user.deal_damage(player, dmg)
                     player.show_healthbar()
 
 
 ALL_moves = []
+
+'''
+move = Move(
+    name='',
+    flavor_text='',
+    base_dmg=,
+    AoE=,
+    status_effect=None,
+    accuracy=,
+    mana_cost=)
+'''
 
 strike = Move(
     name='strike',
@@ -127,8 +141,26 @@ flame_blast = Move(
     accuracy=80,
     mana_cost=10)
 
+sharp_shooter = Move(
+    name='Sharp shooter',
+    flavor_text='A magic attack that never misses',
+    base_dmg=15,
+    AoE=False,
+    status_effect=None,
+    accuracy=200,
+    mana_cost=15)
+
+hell_fire = Move(
+    name='Hell fire',
+    flavor_text='Rain fire from the heavens',
+    base_dmg=30,
+    AoE=True,
+    status_effect=None,
+    accuracy=90,
+    mana_cost=40)
+
 starting_moveset = {
-    'Player': [strike, strong_strike, flame_blast],
+    'Player': [strike, strong_strike, flame_blast, sharp_shooter, hell_fire],
     'Gremlin': [weak_strike],
     'Bat': [weak_strike],
     'Slime': [weak_strike]
