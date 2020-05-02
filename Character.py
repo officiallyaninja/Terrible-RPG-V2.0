@@ -1,5 +1,5 @@
 import random
-from termcolor import colored
+from termcolor import colored, cprint
 from Move import starting_moveset
 
 
@@ -114,7 +114,14 @@ class Player(Character):
     def get_fight_option(self):  # get what option the player actually wants to do
         while True:  # error handling while loop
             # choice will be of form: A1,B1,A2,B2...A12,B12...
-            choice = input('choose an attack or item: ')
+            try:
+                choice = input('choose an attack or item: ')
+            except EOFError:
+                cprint('stop trying to break my program you dickhead', 'red')
+                continue
+
+            if choice.lower() == 'pass':
+                return 'pass'
             if len(choice) < 2:
                 print('ERROR: you did not type anything')
                 continue
@@ -145,6 +152,10 @@ class Player(Character):
             return choice
 
     def do_fight_option(self, choice):  # actually do the move/ use the item the player choose
+        if choice == 'pass':
+            cprint('you decide to do nothing, and bide your time', 'green')
+            return None
+
         index = choice['index']
 
         if choice['type'] == 'A':
