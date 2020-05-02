@@ -1,5 +1,6 @@
 import random
 from termcolor import colored, cprint
+from Misc_functions import unfucked_input
 
 
 def show_opponents(opponent_list):
@@ -44,7 +45,7 @@ class Move():
                     show_opponents(opponents)
                     if len(opponents) > 1:
                         while True:
-                            target_index = input('which enemy do you want to attack?: ')
+                            target_index = unfucked_input('which enemy do you want to attack?: ')
                             try:
                                 target_index = int(target_index)
                             except ValueError:

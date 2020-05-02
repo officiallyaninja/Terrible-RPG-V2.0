@@ -1,6 +1,7 @@
 import random
 from termcolor import colored, cprint
 from Move import starting_moveset
+from Misc_functions import unfucked_input
 
 
 class Character():
@@ -114,11 +115,7 @@ class Player(Character):
     def get_fight_option(self):  # get what option the player actually wants to do
         while True:  # error handling while loop
             # choice will be of form: A1,B1,A2,B2...A12,B12...
-            try:
-                choice = input('choose an attack or item: ')
-            except EOFError:
-                cprint('stop trying to break my program you dickhead', 'red')
-                continue
+            choice = unfucked_input('choose an attack or item: ')
 
             if choice.lower() == 'pass':
                 return 'pass'

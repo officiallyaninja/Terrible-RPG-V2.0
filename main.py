@@ -1,6 +1,7 @@
 from Character import *
 from Move import *
 import os
+from Misc_functions import unfucked_input
 os.system('color')
 
 
@@ -46,7 +47,8 @@ while len(p.opponents) > 0 and p.hp > 0:
     p.do_fight_option(choice)
     p.end_turn()
     remove_dead_enemies()
-    input('press enter to continue: ')
+
+    unfucked_input('press enter to continue: ')
     os.system('cls')
 
     # enemies' turns
@@ -57,7 +59,7 @@ while len(p.opponents) > 0 and p.hp > 0:
             enemy.newly_born = False
         else:
             enemy.attack(p)
-            input('press enter to continue: ')
+            unfucked_input('press enter to continue: ')
         os.system('cls')
         if not enemy.dead:
             enemy.end_turn()
