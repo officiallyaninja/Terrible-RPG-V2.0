@@ -6,9 +6,8 @@ os.system('color')
 
 p = Player()
 
-# p.opponents.append(Gremlin())
-# p.opponents.append(Bat())
-p.opponents.append(Slime())
+p.opponents.append(Gremlin())
+p.opponents.append(Bat())
 p.opponents.append(Slime())
 
 
@@ -34,23 +33,36 @@ def remove_dead_enemies():
 
 def show_fight_status(player):
     player.show_healthbar()
+    player.show_manabar()
     show_opponents(player.opponents)
 
 
-while len(p.opponents) > 0:
+while len(p.opponents) > 0 and p.hp > 0:
+    # players turn
     show_fight_status(p)
     p.show_fight_options()
     choice = p.get_fight_option()
     os.system('cls')
     p.do_fight_option(choice)
+    p.end_turn()
     remove_dead_enemies()
     input('press enter to continue: ')
     os.system('cls')
-    for enemy in p.opponents:
-        # if enemy.newly_born:  # checks if the enemy was *just* created in current encounter
-        #    pass
-        # else:
-        enemy.attack(p)
-        input('press enter to continue: ')
+
+    # enemies' turns
+    i = 0
+    while i < len(p.opponents):
+        enemy = p.opponents[i]
+        if enemy.newly_born:  # checks if the enemy was *just* created in current encounter
+            enemy.newly_born = False
+        else:
+            enemy.attack(p)
+            input('press enter to continue: ')
         os.system('cls')
-print('hurray you won')
+        if not enemy.dead:
+            enemy.end_turn()
+            i += 1
+if p.hp > 0 and len(p.opponents) == 0:
+    print('hurray you won')
+if p.hp <= 0:
+    print(colored('you died', 'red'))

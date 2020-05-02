@@ -10,18 +10,20 @@ def show_opponents(opponent_list):
 
 
 class Move():
-    def __init__(self, name, base_dmg, AoE, status_effect, accuracy, flavor_text=''):
+    def __init__(self, name, base_dmg, AoE, status_effect, accuracy, mana_cost=0, flavor_text=''):
         self.name = name
         self.flavor_text = flavor_text
         self.base_dmg = base_dmg
         self.AoE = AoE
         self.status_effect = status_effect
         self.accuracy = accuracy
+        self.mana_cost = mana_cost
 
     # attacks automatically removed dead/killed enemies from the opponent list(opponents)
     def use_move(self, user, opponents):  # opponents is the list of enemies the enemy has to fight
         if self.base_dmg > 0:  # checks to see if its an attacking or no attacking move
             # base damage of an attack for that character
+            user.mana -= self.mana_cost
             dmg = (((user.ATK) / 2) * (self.base_dmg))
 
             if user.isPlayer:  # checks if the user is the player or an enemy
@@ -122,7 +124,8 @@ flame_blast = Move(
     base_dmg=10,
     AoE=True,
     status_effect=None,  # should be burning here
-    accuracy=80)
+    accuracy=80,
+    mana_cost=10)
 
 starting_moveset = {
     'Player': [strike, strong_strike, flame_blast],
