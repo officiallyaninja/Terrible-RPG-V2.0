@@ -46,8 +46,8 @@ while len(p.opponents) > 0 and p.hp > 0:
     os.system('cls')
     p.do_fight_option(choice)
     p.end_turn()
-    remove_dead_enemies()
 
+    remove_dead_enemies()
     unfucked_input('press enter to continue: ')
     os.system('cls')
 
@@ -59,11 +59,13 @@ while len(p.opponents) > 0 and p.hp > 0:
             enemy.newly_born = False
         else:
             enemy.attack(p)
+            if enemy in Character.opponents:
+                enemy.end_turn()
             unfucked_input('press enter to continue: ')
         os.system('cls')
         if not enemy.dead:
-            enemy.end_turn()
             i += 1
+
 if p.hp > 0 and len(p.opponents) == 0:
     print('hurray you won')
 if p.hp <= 0:

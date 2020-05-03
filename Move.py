@@ -2,6 +2,7 @@ import random
 from termcolor import colored, cprint
 from Misc_functions import unfucked_input
 from Status_conditions import *
+import os
 
 
 def show_opponents(opponent_list):
@@ -12,18 +13,23 @@ def show_opponents(opponent_list):
 
 
 class Move():
-    def __init__(self, name, base_dmg, AoE, accuracy, status_conditions=[], mana_cost=0, flavor_text=''):
+    def __init__(self, name, base_dmg, AoE, accuracy, buffs=[], debuffs=[], mana_cost=0, flavor_text=''):
         self.name = name
         self.flavor_text = flavor_text
         self.base_dmg = base_dmg
         self.AoE = AoE
         self.accuracy = accuracy
         self.mana_cost = mana_cost
-        self.status_conditions = status_conditions
+        self.buffs = buffs
+        self.debuffs = debuffs
 
-    def apply_status_conditions(self, target):
-        for status in self.status_conditions:
+    def apply_debuffs(self, target):
+        for status in self.debuffs:
             target.apply_status(status)
+
+    def apply_buffs(self, user):
+        for status in self.buffs:
+            user.apply_status(status)
 
     # attacks automatically removed dead/killed enemies from the opponent list(opponents)
     def use_move(self, user, opponents):  # opponents is the list of enemies the enemy has to fight
@@ -32,6 +38,8 @@ class Move():
         # base damage of an attack for that character
         user.mana -= self.mana_cost
         dmg = (((user.ATK) / 2) * (self.base_dmg))
+        if user.has_status(Weakness):
+            dmg = int(dmg * 0.75)
 
         if user.isPlayer:  # checks if the user is the player or an enemy
             if self.AoE:  # checks if the move hits all enemies or just one Enemy
@@ -45,12 +53,12 @@ class Move():
                     dmg = dmg * random.uniform(0.9, 1.1)
                     cprint(f'{user.name} used {self.name} on {enemy.name}', 'green')
                     user.deal_damage(enemy, dmg)
-                    self.apply_status_conditions(enemy)
+                    self.apply_debuffs(enemy)
 
             # TODO: add status effect check here
             else:
-                show_opponents(opponents)
                 if len(opponents) > 1:
+                    show_opponents(opponents)
                     while True:
                         target_index = unfucked_input('which enemy do you want to attack?: ')
                         try:
@@ -68,6 +76,7 @@ class Move():
                             continue
 
                         break
+                    os.system('cls')
                 else:
                     target = opponents[0]
                 #    target = opponents[int(input('which enemy do you want to attack?: '))]
@@ -79,7 +88,7 @@ class Move():
                 dmg = dmg * random.uniform(0.9, 1.1)
                 cprint(f'{user.name} used {self.name} on {target.name}', 'green')
                 user.deal_damage(target, dmg)
-                self.apply_status_conditions(target)
+                self.apply_debuffs(target)
                 # TODO: add status effect check here
 
             for enemy in opponents:
@@ -89,7 +98,6 @@ class Move():
                 if enemy.dead:
                     enemy.die(opponents)
                 '''
-
             show_opponents(opponents)
         # TODO: make enemies attack too u idiot
         else:  # this is for if the user of the attack is an enemy.
@@ -101,8 +109,10 @@ class Move():
             else:
                 cprint(f'{user.name} used {self.name} on {player.name}', 'green')
                 user.deal_damage(player, dmg)
-                self.apply_status_conditions(player)
+                self.apply_debuffs(player)
                 player.show_healthbar()
+
+        self.apply_buffs(user)
 
 
 ALL_moves = []
@@ -113,7 +123,7 @@ move = Move(
     flavor_text='',
     base_dmg=,
     AoE=,
-    status_conditions=[],
+    debuffs=[],
     accuracy=,
     mana_cost=)
 '''
@@ -130,7 +140,7 @@ weak_strike = Move(
     flavor_text='a simple strike',
     base_dmg=5,
     AoE=False,
-    status_conditions=[],
+    debuffs=[],
     accuracy=100)
 
 strong_strike = Move(
@@ -145,7 +155,7 @@ flame_blast = Move(
     flavor_text='cast a blast of flames to burn your opponents',
     base_dmg=10,
     AoE=True,
-    status_conditions=[Burning],  # should be burning here
+    debuffs=[Burning],  # should be burning here
     accuracy=50,
     mana_cost=10)
 
@@ -153,7 +163,8 @@ sharp_shooter = Move(
     name='Sharp shooter',
     flavor_text='A magic attack that never misses',
     base_dmg=15,
-    status_conditions=[],
+    buffs=[],
+    debuffs=[],
     AoE=False,
     accuracy=200,
     mana_cost=15)

@@ -2,9 +2,12 @@ import random
 from termcolor import colored, cprint
 from Move import starting_moveset
 from Misc_functions import unfucked_input
+from Status_conditions import *
 
 
 class Character():
+    opponents = []
+
     def __init__(self):
         self.dead = False  # checks whether player or enemy is dead
         # TODO: add a way for characters to die
@@ -37,7 +40,7 @@ class Character():
         if index is not None:
             self.status_conditions[index]['duration'] += status['duration']
         else:
-            self.status_conditions.append(status)
+            self.status_conditions.append(status.copy())
         name = status['name']
         cprint(f'{self.name} was affected by {name}', 'cyan')
 
@@ -80,6 +83,27 @@ class Character():
     def end_turn(self):
         self.mana = min(self.max_mana, self.mana + self.mana_regen)
 
+        if self.has_status(Burning):
+            cprint(f'{self.name} takes 10 burning damage', 'red')
+            self.hp -= 10
+            self.show_healthbar()
+
+        for i in range(0, len(self.status_conditions)):
+            status = self.status_conditions[i]
+            status['duration'] -= 1
+            if status['duration'] == 0:
+                self.status_conditions[i] = None
+
+        i = 0
+        while None in self.status_conditions:
+            if self.status_conditions[i] is None:
+                self.status_conditions.pop(i)
+            else:
+                i += 1
+
+        if self.dead or self.hp <= 0:
+            self.die(Character.opponents)
+
     # def die(self): should remove enemies from opponents, and end game for player
 
 
@@ -96,7 +120,6 @@ class Player(Character):
         self.color = 'red'  # player color is red to easily differentiate from enemies
         self.isPlayer = True
         self.moves = []
-        self.opponents = []
 
     def show_manabar(self):
         mana_bar = "["
