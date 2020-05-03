@@ -1,9 +1,12 @@
 import random
-from termcolor import colored
+from termcolor import cprint
 
-L = ['a', 'b', 'c']
-for i in range(0, 100):
-    x = random.sample(L, 1)
-
-print(colored('[■■■■■■■■■         ]', 'red'))
-print(colored('[■■■■■■■■■■■■■     ]', 'blue'))
+burning = {'active': True, 'duration': 3}
+c = burning.copy()
+while c['active']:
+    cprint('AHHHHHHHHHHHHHH', 'red')
+    c['duration'] -= 1
+    if c['duration'] <= 0:
+        print('oh thats done')
+        c['active'] = False
+print(burning)

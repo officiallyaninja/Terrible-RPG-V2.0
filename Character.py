@@ -17,6 +17,29 @@ class Character():
         self.mana = 0
         self.max_mana = 100
         self.mana_regen = 0
+        self.status_conditions = []
+
+    def has_status(self, status):
+        for status_condition in self.status_conditions:
+            if status_condition['name'] == status['name']:
+                return True
+        return False
+
+    def get_status_index(self, status):
+        for i in range(0, len(self.status_conditions)):
+            status_condition = self.status_conditions[i]
+            if status['name'] == status_condition['name']:
+                return i
+        return None
+
+    def apply_status(self, status):
+        index = self.get_status_index(status)
+        if index is not None:
+            self.status_conditions[index]['duration'] += status['duration']
+        else:
+            self.status_conditions.append(status)
+        name = status['name']
+        cprint(f'{self.name} was affected by {name}', 'cyan')
 
     def get_health_percent(self):  # gives percent of health remaining as a float b/w 0 and 1
         return self.hp / self.maxhp
@@ -67,7 +90,7 @@ class Player(Character):
         self.maxhp = 100
         self.hp = self.maxhp  # initially hp will be max hp
         self.max_mana = 100
-        self.mana = 10
+        self.mana = 100
         self.mana_regen = 5
         self.ATK = 3
         self.color = 'red'  # player color is red to easily differentiate from enemies
