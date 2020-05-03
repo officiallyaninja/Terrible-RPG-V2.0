@@ -66,7 +66,8 @@ class Character():
             health_bar += ' '
 
         # also gives a precise numeric display, in case the player needs it
-        health_bar += f'] {self.hp}/{self.maxhp}'
+        display_hp = max(0, self.hp)  # this is so health is never shown to be -ve
+        health_bar += f'] {display_hp}/{self.maxhp}'
         # health is set to be red in colour for the player, and white for enemies
         # this is to make it easy to distinguish and see
         print(self.name)
@@ -83,7 +84,7 @@ class Character():
     def end_turn(self):
         self.mana = min(self.max_mana, self.mana + self.mana_regen)
 
-        if self.has_status(Burning):
+        if self.has_status(Burning) and self.hp > 0:
             cprint(f'{self.name} takes 10 burning damage', 'red')
             self.hp -= 10
             self.show_healthbar()
@@ -219,7 +220,8 @@ class Enemy(Character):
         self.ATK = self.base_attack + random.randint(-1, 1)  # slightly varies the attack power
         self.newly_born = False
 
-    def die(self, oppponents_list):  # opponents list is the list of all enemies the player has to face in the current encounter
+    # opponents list is the list of all enemies the player has to face in the current encounter
+    def die(self, oppponents_list=Character.opponents):
         self.dead = True
         index = oppponents_list.index(self)
         oppponents_list.pop(index)
