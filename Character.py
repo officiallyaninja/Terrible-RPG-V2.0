@@ -91,8 +91,11 @@ class Character():
 
         for i in range(0, len(self.status_conditions)):
             status = self.status_conditions[i]
-            status['duration'] -= 1
+            if status['duration'] != 'inf':
+                status['duration'] -= 1
             if status['duration'] == 0:
+                name = status['name']
+                cprint(f'{self.name} no longer has status effect "{name}"', 'cyan')
                 self.status_conditions[i] = None
 
         i = 0
