@@ -3,6 +3,7 @@ from termcolor import colored, cprint
 from Move import starting_moveset
 from Misc_functions import unfucked_input
 from Status_conditions import *
+from Artifact import *
 
 
 class Character():
@@ -15,16 +16,22 @@ class Character():
         self.color = 'white'
         self.isPlayer = False
         self.evasion = 0
-        self.moveset = starting_moveset[self.name]
+        self.base_moveset = starting_moveset[self.name]
+
+        for move in self.base_moveset:
+            move.owner = self
         # self.inactive = False  # if an enemy is inactive, then its removed from combat without dying
         self.mana = 0
         self.max_mana = 100
         self.mana_regen = 0
         self.status_conditions = []
+        self.artifacts = []
+        self.weapon = None
+        self.bag = []
 
-    def has_status(self, status):
+    def has_status(self, status_name):
         for status_condition in self.status_conditions:
-            if status_condition['name'] == status['name']:
+            if status_condition['name'].lower() == status_name.lower():
                 return True
         return False
 
@@ -42,7 +49,7 @@ class Character():
         else:
             self.status_conditions.append(status.copy())
         name = status['name']
-        cprint(f'{self.name} was affected by {name}', 'cyan')
+        cprint(f'{self.name} now has the status effect "{name}"', 'cyan')
 
     def get_health_percent(self):  # gives percent of health remaining as a float b/w 0 and 1
         return self.hp / self.maxhp
@@ -82,20 +89,25 @@ class Character():
             other.dead = True
 
     def end_turn(self):
+        printed_something = False  # checks whether anything has been printed in this function
         self.mana = min(self.max_mana, self.mana + self.mana_regen)
+        if self.isPlayer:
+            cprint(f'Player gained {self.mana_regen} mana', 'blue')
+            printed_something = True
 
-        if self.has_status(Burning) and self.hp > 0:
+        if self.has_status('burning') and self.hp > 0:
             cprint(f'{self.name} takes 10 burning damage', 'red')
+            printed_something = True
             self.hp -= 10
-            self.show_healthbar()
 
         for i in range(0, len(self.status_conditions)):
             status = self.status_conditions[i]
             if status['duration'] != 'inf':
                 status['duration'] -= 1
-            if status['duration'] == 0:
+            if status['duration'] <= 0:
                 name = status['name']
                 cprint(f'{self.name} no longer has status effect "{name}"', 'cyan')
+                printed_something = True
                 self.status_conditions[i] = None
 
         i = 0
@@ -107,23 +119,57 @@ class Character():
 
         if self.dead or self.hp <= 0:
             self.die(Character.opponents)
+            printed_something = True
+        if printed_something is False:
+            cprint('(None)', 'yellow')
 
-    # def die(self): should remove enemies from opponents, and end game for player
+    def equip_artifact(self, artifact):
+        artifact.owner = self
+        self.artifacts.append(artifact)
+        artifact.trigger_equip_effects()
+
+    def equip_item(self, item):
+        item.owner = self
+        self.bag.append(item)
+
+    def use_item(self, item_index):
+        item = self.bag.pop(item_index)
+        item.trigger_effects()
+
+    def learn_move(self, move):
+        self.base_moveset.append(move)
+        self.moveset.append(move)
 
 
 class Player(Character):
     def __init__(self):
         self.name = 'Player'  # maybe i will later make this a variable that the player enters
         super().__init__()
+
         self.maxhp = 100
         self.hp = self.maxhp  # initially hp will be max hp
+
         self.max_mana = 100
-        self.mana = 100
-        self.mana_regen = 5
-        self.ATK = 3
+        self.mana = 35
+
+        self.base_mana_regen = 5
+        self.mana_regen = self.base_mana_regen
+
+        self.base_ATK = 3
+        self.ATK = self.base_ATK
+
+        self.base_evasion = 5
+        self.evasion = self.base_evasion
+
+        self.weapon = None
+        self.artifacts = []
+
         self.color = 'red'  # player color is red to easily differentiate from enemies
         self.isPlayer = True
-        self.moves = []
+        self.moveset = self.base_moveset
+
+    def die(self, dummy_var):  # dummy var is needed because enemies death function needs 2 args
+        pass
 
     def show_manabar(self):
         mana_bar = "["
@@ -161,6 +207,13 @@ class Player(Character):
                 print(colored('A' + str(i + 1) + ':', 'red'), end='', sep='')
                 print(colored(f'[{move.mana_cost}]', 'red'), end='', sep='')
                 print(colored(f'{move.name} - {move.flavor_text}', 'red'))
+        print('')
+
+        for i in range(0, len(self.bag)):
+            item = self.bag[i]
+            print(colored('B' + str(i + 1) + ':', 'green'), end='', sep='')
+            print(f'{item.name} - {item.flavor_text}')
+            print('')
 
     def get_fight_option(self):  # get what option the player actually wants to do
         while True:  # error handling while loop
@@ -170,7 +223,8 @@ class Player(Character):
             if choice.lower() == 'pass':
                 return 'pass'
             if len(choice) < 2:
-                print('ERROR: you did not type anything')
+                print(
+                    'ERROR: please type a letter, A for attack or B for item, and then the index of the attack/item')
                 continue
             type = choice[0].upper()  # A for (A)ttack, B for item from (B)ag
             index = choice[1:]
@@ -209,9 +263,22 @@ class Player(Character):
             move = self.moveset[index]
             move.use_move(self, self.opponents)
         elif choice['type'] == 'B':
-            print('item support has not yet been built in yet')
+            print('ERROR: YOU DIDNT LOOP AFTER ACTIVATING THE ITEM')
         else:
             print('you fucked up your error handling dude')
+
+    def start_battle(self):
+        for artifact in self.artifacts:
+            artifact.trigger_battle_effects()
+        if self.weapon is not None:
+            weapon.trigger_battle_effects()  # write code for this in Artifacts
+
+    def end_battle(self):
+        self.status_conditions.clear()
+        self.ATK = self.base_ATK
+        self.mana_regen = self.base_mana_regen
+        self.evasion = self.base_evasion
+        self.moveset = self.base_moveset
 
 
 class Enemy(Character):
@@ -221,6 +288,7 @@ class Enemy(Character):
                          )  # some variance in max health
         self.hp = self.maxhp  # initially hp will be max hp
         self.ATK = self.base_attack + random.randint(-1, 1)  # slightly varies the attack power
+        self.moveset = self.base_moveset
         self.newly_born = False
 
     # opponents list is the list of all enemies the player has to face in the current encounter
