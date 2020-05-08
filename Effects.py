@@ -57,3 +57,14 @@ class ManaRegenUp(Effect):
     def trigger(self):
         super().trigger()
         self.parent.owner.mana_regen += self.strength
+
+
+class ManaUp(Effect):
+    def __init__(self, strength):
+        self.info_text = f'+{strength} Mana'
+        self.strength = strength
+
+    def trigger(self):
+        super().trigger()
+        self.parent.owner.mana = min(
+            self.parent.owner.mana + self.strength, self.parent.owner.maxhp)

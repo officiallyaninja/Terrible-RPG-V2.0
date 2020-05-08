@@ -4,10 +4,18 @@ from Move import starting_moveset
 from Misc_functions import unfucked_input
 from Status_conditions import *
 from Artifact import *
+import os
 
 
 class Character():
     opponents = []
+
+    @staticmethod
+    def show_opponents():
+        for i in range(0, len(Character.opponents)):
+            # we have a plus 1 to start indexing from 1 not 0
+            print(colored(i + 1, 'green'), ': ', end='', sep='')
+            Character.opponents[i].show_healthbar()
 
     def __init__(self):
         self.dead = False  # checks whether player or enemy is dead
@@ -132,8 +140,8 @@ class Character():
         item.owner = self
         self.bag.append(item)
 
-    def use_item(self, item_index):
-        item = self.bag.pop(item_index)
+    def use_item(self, item):
+        item.owner = self
         item.trigger_effects()
 
     def learn_move(self, move):
@@ -195,6 +203,11 @@ class Player(Character):
         # this is to make it easy to distinguish and see
         print(colored(mana_bar, 'blue'))
 
+    def show_fight_status(self):
+        self.show_healthbar()
+        self.show_manabar()
+        self.show_opponents()
+
     def show_fight_options(self):
         for i in range(0, len(self.moveset)):
             move = self.moveset[i]
@@ -213,7 +226,7 @@ class Player(Character):
             item = self.bag[i]
             print(colored('B' + str(i + 1) + ':', 'green'), end='', sep='')
             print(f'{item.name} - {item.flavor_text}')
-            print('')
+        print('')
 
     def get_fight_option(self):  # get what option the player actually wants to do
         while True:  # error handling while loop
@@ -238,8 +251,23 @@ class Player(Character):
             except ValueError:
                 print('ERROR: you should have a number after the first character')
                 continue
+
+            if type.upper() == 'B':  # if the option choses is an item
+                if index >= len(self.bag) or index < 0:
+                    # because we subtracted 1 from the player submitted index, we check index < 0 and not index < 1
+                    print('ERROR: index error, choose a valid number for item index')
+                    continue
+                else:
+                    item = self.bag.pop(index)
+                    self.use_item(item)
+                    os.system('cls')
+                    self.show_fight_status()
+                    self.show_fight_options()
+                    continue
+
             if index >= len(self.moveset) or index < 0:
-                print('ERROR: index error, choose a valid number for attack/item index')
+                # because we subtracted 1 from the player submitted index, we check index < 0 and not index < 1
+                print('ERROR: index error, choose a valid number for attack index')
                 continue
             if self.moveset[index].mana_cost > self.mana:
                 print('you dont have enough mana for that')

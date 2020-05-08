@@ -20,3 +20,9 @@ health_potion = Item(
     flavor_text='a potion that heals 30 HP',
     effects=[HealUp(30)]
 )
+
+mana_potion = Item(
+    name='mana potion',
+    flavor_text='a potion that gives 30 mana',
+    effects=[ManaUp(30)]
+)

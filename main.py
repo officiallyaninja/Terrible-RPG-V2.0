@@ -11,6 +11,8 @@ player = Player()
 player.opponents.append(Gremlin())
 player.opponents.append(Bat())
 player.opponents.append(Slime())
+player.bag.extend([health_potion, health_potion, mana_potion])
+print(player.bag)
 
 
 def check_if_all_enemies_are_alive():
@@ -33,12 +35,6 @@ def remove_dead_enemies():
         remove_dead_enemies()
 
 
-def show_fight_status(player):
-    player.show_healthbar()
-    player.show_manabar()
-    show_opponents(player.opponents)
-
-
 # fight loop
 ######################################################
 if len(player.artifacts) > 0 or player.weapon is not None:
@@ -49,7 +45,7 @@ if len(player.artifacts) > 0 or player.weapon is not None:
 
 while len(player.opponents) > 0 and player.hp > 0:
     # players turn
-    show_fight_status(player)
+    player.show_fight_status()
     player.show_fight_options()
     choice = player.get_fight_option()
     os.system('cls')
