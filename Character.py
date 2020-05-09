@@ -8,7 +8,8 @@ import os
 
 
 class Character():
-    opponents = []
+    opponents = []  # list of all the enemies the player has to fight in current encounter
+    player_character = None  # this should contain the player object
 
     @staticmethod
     def show_opponents():
@@ -16,6 +17,25 @@ class Character():
             # we have a plus 1 to start indexing from 1 not 0
             print(colored(i + 1, 'green'), ': ', end='', sep='')
             Character.opponents[i].show_healthbar()
+
+    @classmethod
+    def end_everyones_turn(self):
+        line = "_" * 30
+
+        print('END TURN EFFECTS')
+        print('================')
+        print(line)
+        cprint('Player:', 'green')
+        player = self.player_character
+        player.end_turn()
+
+        for enemy in player.opponents:
+            print(line)
+            cprint(f'{enemy.name}:', 'green')
+            enemy.end_turn()
+        print(line)
+        unfucked_input('press enter to continue: ')
+        os.system('cls')
 
     def __init__(self):
         self.dead = False  # checks whether player or enemy is dead
@@ -124,6 +144,9 @@ class Character():
                 self.status_conditions.pop(i)
             else:
                 i += 1
+
+        for artifact in self.artifacts:
+            artifact.trigger_turn_effects()
 
         if self.dead or self.hp <= 0:
             self.die(Character.opponents)

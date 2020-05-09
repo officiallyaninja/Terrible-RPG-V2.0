@@ -2,11 +2,12 @@ from Effects import *
 
 
 class Artifact():
-    def __init__(self, name, flavor_text, equip_effects=[], battle_effects=[]):
+    def __init__(self, name, flavor_text, equip_effects=[], battle_effects=[], turn_effects=[]):
         self.name = name
         self.flavor_text = "lorem ipsum"
         self.equip_effects = equip_effects
         self.battle_effects = battle_effects
+        self.turn_effects = turn_effects
         self.owner = None  # what character owns this artifact.
 
         for effect in self.equip_effects:
@@ -21,6 +22,10 @@ class Artifact():
 
     def trigger_battle_effects(self):
         for effect in self.battle_effects:
+            effect.trigger()
+
+    def trigger_turn_effects(self):
+        for effect in self.turn_effects:
             effect.trigger()
 
 

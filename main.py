@@ -7,6 +7,7 @@ os.system('color')
 
 
 player = Player()
+Character.player_character = player
 
 player.opponents.append(Gremlin())
 player.opponents.append(Bat())
@@ -67,20 +68,8 @@ while len(player.opponents) > 0 and player.hp > 0:
         os.system('cls')
         if not enemy.dead:
             i += 1
+    Character.end_everyones_turn()
 
-    print('END TURN EFFECTS')
-    print('================')
-    print('_' * 30)
-    for enemy in player.opponents:
-        cprint(f'{enemy.name}:', 'green')
-        enemy.end_turn()
-        print('_' * 30)
-    cprint('Player:', 'green')
-    player.end_turn()
-    print('_' * 30)
-    unfucked_input('press enter to continue: ')
-    os.system('cls')
-    player.equip_item(health_potion)
 if player.hp > 0 and len(player.opponents) == 0:
     print('hurray you won')
 if player.hp <= 0:
