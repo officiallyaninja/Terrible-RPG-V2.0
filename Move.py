@@ -16,7 +16,7 @@ def show_opponents(opponent_list):
 class Move():
     learnable_moves = []
 
-    def __init__(self, name, base_dmg, AoE, accuracy, buffs=[], debuffs=[], effects=[], mana_cost=0, flavor_text='', learnable=False):
+    def __init__(self, name, base_dmg, cost=1000, AoE=False, accuracy=100, buffs=[], debuffs=[], effects=[], mana_cost=0, flavor_text='', learnable=False):
         self.name = name
         self.flavor_text = flavor_text
         self.base_dmg = base_dmg
@@ -28,11 +28,27 @@ class Move():
         self.effects = effects
         self.learnable = learnable
         self.owner = None
+        self.cost = cost
         if self.learnable:
             Move.learnable_moves.append(self)
 
         for effect in self.effects:
             effect.parent = self
+
+    def copy(self):
+        copy = Move(
+            name=self.name,
+            flavor_text=self.flavor_text,
+            base_dmg=self.base_dmg,
+            Aoe=self.Aoe,
+            accuracy=self.accuracy,
+            buffs=self.buffs,
+            debuffs=self.debuffs,
+            effects=self.effects,
+            mana_cost=self.mana_cost,
+            learnable=False
+        )
+        return copy
 
     def apply_debuffs(self, target):
         for status in self.debuffs:
@@ -47,9 +63,12 @@ class Move():
         user.mana -= self.mana_cost
         if self.base_dmg > 0:
 
-            # base damage of an attack for that character
+            if user.weapon is not None:
+                dmg_multiplier = user.weapon.damage_multiplier
+            else:
+                dmg_multiplier = 1
 
-            dmg = (((user.ATK) / 2) * (self.base_dmg))
+            dmg = int(((user.ATK) / 2) * (self.base_dmg) * (dmg_multiplier))
             if user.has_status('Weakness'):
                 dmg = int(dmg * 0.75)
 
@@ -138,6 +157,7 @@ class Move():
 
         self.apply_buffs(user)
         for effect in self.effects:
+            effect.parent = self
             effect.trigger()
             # cprint(effect.info_text, 'cyan')
 
@@ -193,7 +213,8 @@ sharp_shooter = Move(
     AoE=False,
     accuracy=200,
     effects=[],
-    mana_cost=30)
+    mana_cost=30,
+    learnable=True)
 
 hell_fire = Move(
     name='Hell fire',
@@ -218,7 +239,29 @@ gaias_blessing = Move(
     AoE=False,
     accuracy=200,
     effects=[HealUp(50)],
-    mana_cost=50)
+    mana_cost=50,
+    learnable=True)
+
+corrupted_healing = Move(
+    name='Corrupted healing',
+    flavor_text='lose 10 MAX HP, but fully heal HP. all enemies will miss for one turn',
+    base_dmg=0,
+    buffs=[{'name': 'unhittable', 'duration': 1}],
+    mana_cost=10,
+    effects=[MaxHpDown(10), FullHeal()],
+)
+
+murder = Move(
+    name='Murder',
+    flavor_text='lose 10 MAX Mana, kill 1 enemy',
+    accuracy=1000,
+    AoE=False,
+    base_dmg=9999,
+    buffs=[],
+    mana_cost=10,
+    effects=[MaxManaDown(10)],
+)
+
 
 starting_moveset = {
     'Player': [strike, flame_blast, hell_fire, gaias_blessing],

@@ -8,35 +8,63 @@ class Effect():
 
     def trigger(self):
         cprint(self.info_text, 'cyan')
+        # this is the actual user (usually player) on whom the effect is triggered
+        global user
+        user = self.parent.owner
 
     def untrigger(self):  # when you need to undo the effects of the trigger
         pass
 
 
 class MaxHpUp(Effect):
-    def __init__(self, strength):
-        self.info_text = f'+{strength} max HP'
+    def __init__(self, strength, permanent=False):
+        self.info_text = f'gained {strength} max HP'
         self.strength = strength  # this is how much max hp is gained
+        self.permanent = permanent
 
     def trigger(self):
         super().trigger()
-        self.parent.owner.maxhp += self.strength
-        self.parent.owner.hp += self.strength
+        user.maxhp += self.strength
+        user.hp += self.strength
 
     def untrigger(self):
-        self.parent.owner.maxhp -= self.strength
-        self.parent.owner.hp = min(self.parent.owner.hp, self.parent.owner.maxhp)
+        if not self.permanent:
+            user.maxhp -= self.strength
+            user.hp = min(user.hp, user.maxhp)
+
+
+class MaxHpDown(Effect):
+    def __init__(self, strength, permanent=True):
+        self.info_text = f'lost {strength} max HP'
+        self.strength = strength  # this is how much max hp is lost
+        self.permanent = permanent
+
+    def trigger(self):
+        super().trigger()
+        user.maxhp -= self.strength
+        user.hp = min(user.hp, user.maxhp)
+
+    def untrigger(self):
+        user.maxhp += self.strength
 
 
 class HealUp(Effect):
     def __init__(self, strength):
-        self.info_text = f'+{strength} HP'
+        self.info_text = f'gained {strength} HP'
         self.strength = strength
 
     def trigger(self):
         super().trigger()
-        self.parent.owner.hp = min(
-            self.parent.owner.hp + self.strength, self.parent.owner.maxhp)
+        user.hp = min(user.hp + self.strength, user.maxhp)
+
+
+class FullHeal(Effect):
+    def __init__(self):
+        self.info_text = f'Healed up to full'
+
+    def trigger(self):
+        super().trigger()
+        user.hp = user.maxhp
 
 
 class Recoil(Effect):
@@ -46,7 +74,7 @@ class Recoil(Effect):
 
     def trigger(self):
         super().trigger()
-        self.parent.owner.hp -= self.strength
+        user.hp -= self.strength
 
 
 class ManaRegenUp(Effect):
@@ -56,7 +84,8 @@ class ManaRegenUp(Effect):
 
     def trigger(self):
         super().trigger()
-        self.parent.owner.mana_regen += self.strength
+        user.base_mana_regen += self.strength
+        user.mana_regen += self.strength
 
 
 class ManaUp(Effect):
@@ -66,5 +95,37 @@ class ManaUp(Effect):
 
     def trigger(self):
         super().trigger()
-        self.parent.owner.mana = min(
-            self.parent.owner.mana + self.strength, self.parent.owner.maxhp)
+        user.mana = min(
+            user.mana + self.strength, user.maxhp)
+
+
+class MaxManaDown(Effect):
+    def __init__(self, strength):
+        self.info_text = f'-{strength} Max Mana'
+        self.strength = strength
+
+    def trigger(self):
+        super().trigger()
+        user.max_mana = max(0, user.max_mana - self.strength)
+        user.mana = min(user.mana, user.max_mana)
+
+
+class Bonfire(Effect):
+    def __init__(self):
+        self.info_text = 'All attacks now have burning'
+
+    def trigger(self):
+        super().trigger()
+        for move in user.moveset:
+            move_has_burning = False
+
+            for debuff in move.debuffs:
+                if debuff['name'] == 'burning':
+                    move_has_burning = True
+
+            if move_has_burning:
+                pass
+            else:
+                move.debuffs.append(
+                    {'name': 'burning', 'duration': 3}
+                )

@@ -4,11 +4,13 @@ from Move import starting_moveset
 from Misc_functions import unfucked_input
 from Status_conditions import *
 from Artifact import *
+from Weapon import *
 import os
 
 
 class Character():
     opponents = []  # list of all the enemies the player has to fight in current encounter
+    gold_from_battle = 0
     player_character = None  # this should contain the player object
 
     @staticmethod
@@ -37,6 +39,18 @@ class Character():
         unfucked_input('press enter to continue: ')
         os.system('cls')
 
+    @classmethod
+    def spawn_enemy(self, list_of_enemies):
+        r = random.randint(0, len(list_of_enemies) - 1)
+        Character.opponents.append(list_of_enemies[r]())
+
+    @classmethod
+    def generate_encounter(self):
+        spawnable_enemies = [Gremlin, Bat, Slime]  # all enemies the player could fight
+        num_of_enemies = random.randint(2, 4)
+        for i in range(0, num_of_enemies):
+            Character.spawn_enemy(spawnable_enemies)
+
     def __init__(self):
         self.dead = False  # checks whether player or enemy is dead
         # TODO: add a way for characters to die
@@ -44,7 +58,9 @@ class Character():
         self.color = 'white'
         self.isPlayer = False
         self.evasion = 0
-        self.base_moveset = starting_moveset[self.name]
+        self.base_moveset = []
+        for move in starting_moveset[self.name]:
+            self.base_moveset.append(move)
 
         for move in self.base_moveset:
             move.owner = self
@@ -56,6 +72,7 @@ class Character():
         self.artifacts = []
         self.weapon = None
         self.bag = []
+        self.gold = 0
 
     def has_status(self, status_name):
         for status_condition in self.status_conditions:
@@ -154,6 +171,23 @@ class Character():
         if printed_something is False:
             cprint('(None)', 'yellow')
 
+    def unequip_weapon(self):
+        if self.weapon is None:
+            pass
+        else:
+            for effect in self.weapon.equip_effects:
+                effect.untrigger()
+            self.moveset = self.base_moveset
+            self.weapon = None
+
+    def equip_weapon(self, weapon):
+        weapon.owner = self
+        self.weapon = weapon
+        self.moveset.extend(weapon.moveset)
+        for move in self.moveset:
+            move.owner = self
+        weapon.trigger_equip_effects()
+
     def equip_artifact(self, artifact):
         artifact.owner = self
         self.artifacts.append(artifact)
@@ -171,17 +205,34 @@ class Character():
         self.base_moveset.append(move)
         self.moveset.append(move)
 
+    def equip(self, thing_to_equip):
+        thing_to_equip.owner = self
+        if isinstance(thing_to_equip, Weapon):
+            self.unequip_weapon()
+            self.equip_weapon(thing_to_equip)
+
+        elif isinstance(thing_to_equip, Artifact):
+            self.equip_artifact(thing_to_equip)
+
+        elif isinstance(thing_to_equip, Item):
+            self.equip_item(thing_to_equip)
+
+        elif isinstance(thing_to_equip, Move):
+            self.learn_move(thing_to_equip)
+        else:
+            print('you done fucked up, you tried to equip something that isnt a weapn artifact or item')
+
 
 class Player(Character):
     def __init__(self):
         self.name = 'Player'  # maybe i will later make this a variable that the player enters
         super().__init__()
 
-        self.maxhp = 100
+        self.maxhp = 1000
         self.hp = self.maxhp  # initially hp will be max hp
 
-        self.max_mana = 100
-        self.mana = 35
+        self.max_mana = 1000
+        self.mana = 1000
 
         self.base_mana_regen = 5
         self.mana_regen = self.base_mana_regen
@@ -194,10 +245,11 @@ class Player(Character):
 
         self.weapon = None
         self.artifacts = []
+        self.gold = 0
 
         self.color = 'red'  # player color is red to easily differentiate from enemies
         self.isPlayer = True
-        self.moveset = self.base_moveset
+        self.moveset = self.base_moveset.copy()
 
     def die(self, dummy_var):  # dummy var is needed because enemies death function needs 2 args
         pass
@@ -225,6 +277,20 @@ class Player(Character):
         # health is set to be red in colour for the player, and white for enemies
         # this is to make it easy to distinguish and see
         print(colored(mana_bar, 'blue'))
+
+    def encounter_shop(self):
+        # there will be 1 or 2 weapons for sale
+        weapons_for_sale = random.sample(Weapon.ALL_weapons, random.randint(1, 2))
+
+        # there will be 2 to 4 artifacts for sale
+        artifacts_for_sale = random.sample(Artifact.ALL_artifacts, random.randint(2, 4))
+
+        # there should be 1-3 moves on sale
+        moves_for_sale = random.sample(Artifact.ALL_artifacts, random.randint(1, 3))
+
+        items_for_sale = []
+        for i in range(random.randint(5, 8)):  # should be 5-8 items for sale
+            items_for_sale.append(random.sample(Item.ALL_items, 1)[0])  # this allows for repeats
 
     def show_fight_status(self):
         self.show_healthbar()
@@ -319,17 +385,32 @@ class Player(Character):
             print('you fucked up your error handling dude')
 
     def start_battle(self):
+        def mana_cost(x):
+            return x.mana_cost
+        self.moveset = sorted(self.moveset, key=mana_cost)
+
         for artifact in self.artifacts:
             artifact.trigger_battle_effects()
         if self.weapon is not None:
-            weapon.trigger_battle_effects()  # write code for this in Artifacts
+            self.weapon.trigger_battle_effects()  # write code for this in Artifacts
 
     def end_battle(self):
         self.status_conditions.clear()
         self.ATK = self.base_ATK
         self.mana_regen = self.base_mana_regen
         self.evasion = self.base_evasion
-        self.moveset = self.base_moveset
+
+        self.gold += Character.gold_from_battle
+
+        print('you gained', colored(f'{self.gold_from_battle} gold',
+                                    'yellow'), 'from that encounter')
+
+        Character.gold_from_battle = 0
+
+        print('you now have', colored(f'{self.gold} gold', 'yellow'))
+
+        unfucked_input('press ented to continue: ')
+        os.system('cls')
 
 
 class Enemy(Character):
@@ -339,6 +420,7 @@ class Enemy(Character):
                          )  # some variance in max health
         self.hp = self.maxhp  # initially hp will be max hp
         self.ATK = self.base_attack + random.randint(-1, 1)  # slightly varies the attack power
+        self.gold = int(self.base_gold * random.uniform(0.8, 1.25))
         self.moveset = self.base_moveset
         self.newly_born = False
 
@@ -348,6 +430,7 @@ class Enemy(Character):
         index = oppponents_list.index(self)
         oppponents_list.pop(index)
         print(colored(f'{self.name} died', 'red'))
+        Character.gold_from_battle += self.gold
     # removes the enemy from the list of opponentsthe player has to face
 
     def attack(self, player):
@@ -362,6 +445,7 @@ class Gremlin(Enemy):
         self.base_maxhp = 50
         self.base_attack = 2
         self.evasion = 5
+        self.base_gold = 20
         super().__init__()
 
 
@@ -371,6 +455,7 @@ class Bat(Enemy):
         self.base_maxhp = 35
         self.base_attack = 4
         self.evasion = 15
+        self.base_gold = 10
         super().__init__()
 
 
@@ -381,6 +466,7 @@ class Slime(Enemy):
         self.base_attack = 2
         self.evasion = 0
         self.has_split = has_split
+        self.base_gold = 25
         super().__init__()
         if maxhp is None:
             pass
@@ -401,6 +487,8 @@ class Slime(Enemy):
         else:
             child1 = Slime(has_split=True, maxhp=self.hp, newly_born=True)
             child2 = Slime(has_split=True, maxhp=self.hp, newly_born=True)
+            child1.gold = 0
+            child2.gold = 0
             player.opponents.extend([child1, child2])
             self.die(player.opponents)
             print('The slime died and split into 2 smaller slimes!')
