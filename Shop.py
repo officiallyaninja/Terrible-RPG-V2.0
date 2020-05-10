@@ -16,8 +16,12 @@ class Shop():
         # should be 5-8 items for sale
         self.items_for_sale = []
         for i in range(random.randint(5, 8)):
-            self.items_for_sale.append(random.sample(Item.ALL_items, 1)
-                                       [0])  # this allows for repeats
+            item = random.sample(Item.ALL_items, 1)[0]
+            self.items_for_sale.append(item)  # this allows for repeats
+
+        def name(x):
+            return x.name
+        self.items_for_sale = sorted(self.items_for_sale, key=name)
 
     def show_wares(self):
         cprint('Weapons:', attrs=['underline'])
@@ -47,8 +51,82 @@ class Shop():
             move = self.moves_for_sale[i]
             index = colored(f'C{i+1}:', 'green')
             cost = colored(f'[{move.cost}]', 'yellow')
-            mana_cost = colored(f'[{move.mana_cost}]')
+            mana_cost = colored(f'[{move.mana_cost}]', 'blue')
             print(f'{index}{cost}{move.name}{mana_cost} - {move.flavor_text}')
+        print('')
+
+        cprint('Items:', attrs=['underline'])
+        if len(self.items_for_sale) == 0:
+            print('(out of stock)')
+        for i in range(0, len(self.items_for_sale)):
+            item = self.items_for_sale[i]
+            index = colored(f'D{i+1}:', 'green')
+            cost = colored(f'[{item.cost}]', 'yellow')
+            print(f'{index}{cost}{item.name} - {item.flavor_text}')
+        print('')
+
+    def get_input(self):
+        while True:
+            error_color = 'green'
+            choice = unfucked_input('enter index of what you want to purchase: ')
+            if len(choice) < 2:
+                cprint(
+                    'ERROR: please enter a letter, and then a number to indicate what you want to buy', error_color)
+                continue
+            if len(choice) > 2:
+                cprint(
+                    'ERROR: please enter a letter, and then a number to indicate what you want to buy', error_color)
+                continue
+
+            type = choice[0].upper()
+            if type not in ['A', 'B', 'C', 'D']:
+                cprint('ERROR: first char should be A,B,C or D', error_color)
+                continue
+            try:
+                index = int(choice[1]) - 1
+            except ValueError:
+                cprint('ERROR: second character should be a number', error_color)
+                continue
+
+            if type == 'A':
+                if len(self.weapons_for_sale) == 0:
+                    cprint('ERROR: There are no weapons you can buy', error_color)
+                    continue
+                if index < 0 or index >= len(self.weapons_for_sale):
+                    cprint('ERROR: number out of range', error_color)
+                    continue
+
+            if type == 'B':
+                if len(self.artifacts_for_sale) == 0:
+                    cprint('ERROR: There are no artifacts you can buy', error_color)
+                    continue
+                if index < 0 or index >= len(self.artifacts_for_sale):
+                    cprint('ERROR: number out of range', error_color)
+                    continue
+
+            if type == 'C':
+                if len(self.moves_for_sale) == 0:
+                    cprint('ERROR: There are no moves you can buy', error_color)
+                    continue
+                if index < 0 or index >= len(self.moves_for_sale):
+                    cprint('ERROR: number out of range', error_color)
+                    continue
+
+            if type == 'D':
+                if len(self.items_for_sale) == 0:
+                    cprint('ERROR: There are no items you can buy', error_color)
+                    continue
+                if index < 0 or index >= len(self.items_for_sale):
+                    cprint('ERROR: number out of range', error_color)
+                    continue
+            choice_dict = {
+                'type': type,
+                'index': index
+            }
+            return choice_dict
 
 
-Shop().show_wares()
+x = Shop()
+x.items_for_sale = []
+x.show_wares()
+x.get_input()

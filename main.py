@@ -52,6 +52,7 @@ while player.hp > 0:
     # fight loop
     ######################################################
     while len(player.opponents) > 0 and player.hp > 0:
+
         # players turn
         player.show_fight_status()
         player.show_fight_options()
