@@ -5,6 +5,7 @@ from Misc_functions import unfucked_input
 from Status_conditions import *
 from Artifact import *
 from Weapon import *
+from Shop import *
 import os
 
 
@@ -73,6 +74,8 @@ class Character():
         self.weapon = None
         self.bag = []
         self.gold = 0
+        self.base_DEF = 1
+        self.DEF = self.base_DEF
 
     def has_status(self, status_name):
         for status_condition in self.status_conditions:
@@ -149,6 +152,9 @@ class Character():
             status = self.status_conditions[i]
             if status['duration'] != 'inf':
                 status['duration'] -= 1
+            duration = status['duration']
+            name = status['name']
+            print(f'{duration} turns of{name} left')
             if status['duration'] <= 0:
                 name = status['name']
                 cprint(f'{self.name} no longer has status effect "{name}"', 'cyan')
@@ -193,13 +199,13 @@ class Character():
         self.artifacts.append(artifact)
         artifact.trigger_equip_effects()
 
-    def equip_item(self, item):
-        item.owner = self
-        self.bag.append(item)
+    def equip_consumable(self, consumable):
+        consumable.owner = self
+        self.bag.append(consumable)
 
-    def use_item(self, item):
-        item.owner = self
-        item.trigger_effects()
+    def use_consumable(self, consumable):
+        consumable.owner = self
+        consumable.trigger_effects()
 
     def learn_move(self, move):
         self.base_moveset.append(move)
@@ -214,13 +220,13 @@ class Character():
         elif isinstance(thing_to_equip, Artifact):
             self.equip_artifact(thing_to_equip)
 
-        elif isinstance(thing_to_equip, Item):
-            self.equip_item(thing_to_equip)
+        elif isinstance(thing_to_equip, Consumable):
+            self.equip_consumable(thing_to_equip)
 
         elif isinstance(thing_to_equip, Move):
             self.learn_move(thing_to_equip)
         else:
-            print('you done fucked up, you tried to equip something that isnt a weapn artifact or item')
+            print('you done fucked up, you tried to equip something that isnt a weapn artifact or consumable')
 
 
 class Player(Character):
@@ -228,28 +234,30 @@ class Player(Character):
         self.name = 'Player'  # maybe i will later make this a variable that the player enters
         super().__init__()
 
-        self.maxhp = 1000
+        self.maxhp = 100
         self.hp = self.maxhp  # initially hp will be max hp
 
-        self.max_mana = 1000
-        self.mana = 1000
+        self.max_mana = 100
+        self.mana = 100
 
         self.base_mana_regen = 5
         self.mana_regen = self.base_mana_regen
 
-        self.base_ATK = 3
+        self.base_ATK = 15
         self.ATK = self.base_ATK
 
-        self.base_evasion = 5
+        self.base_evasion = 15
         self.evasion = self.base_evasion
 
         self.weapon = None
         self.artifacts = []
-        self.gold = 0
+        self.gold = 150
 
         self.color = 'red'  # player color is red to easily differentiate from enemies
         self.isPlayer = True
         self.moveset = self.base_moveset.copy()
+        self.kill_count = 0
+        self.next_shop = 3
 
     def die(self, dummy_var):  # dummy var is needed because enemies death function needs 2 args
         pass
@@ -278,20 +286,6 @@ class Player(Character):
         # this is to make it easy to distinguish and see
         print(colored(mana_bar, 'blue'))
 
-    def encounter_shop(self):
-        # there will be 1 or 2 weapons for sale
-        weapons_for_sale = random.sample(Weapon.ALL_weapons, random.randint(1, 2))
-
-        # there will be 2 to 4 artifacts for sale
-        artifacts_for_sale = random.sample(Artifact.ALL_artifacts, random.randint(2, 4))
-
-        # there should be 1-3 moves on sale
-        moves_for_sale = random.sample(Artifact.ALL_artifacts, random.randint(1, 3))
-
-        items_for_sale = []
-        for i in range(random.randint(5, 8)):  # should be 5-8 items for sale
-            items_for_sale.append(random.sample(Item.ALL_items, 1)[0])  # this allows for repeats
-
     def show_fight_status(self):
         self.show_healthbar()
         self.show_manabar()
@@ -312,23 +306,23 @@ class Player(Character):
         print('')
 
         for i in range(0, len(self.bag)):
-            item = self.bag[i]
+            consumable = self.bag[i]
             print(colored('B' + str(i + 1) + ':', 'green'), end='', sep='')
-            print(f'{item.name} - {item.flavor_text}')
+            print(f'{consumable.name} - {consumable.flavor_text}')
         print('')
 
     def get_fight_option(self):  # get what option the player actually wants to do
         while True:  # error handling while loop
             # choice will be of form: A1,B1,A2,B2...A12,B12...
-            choice = unfucked_input('choose an attack or item: ')
+            choice = unfucked_input('choose an attack or consumable: ')
 
             if choice.lower() == 'pass':
                 return 'pass'
             if len(choice) < 2:
                 print(
-                    'ERROR: please type a letter, A for attack or B for item, and then the index of the attack/item')
+                    'ERROR: please type a letter, A for attack or B for consumable, and then the index of the attack/consumable')
                 continue
-            type = choice[0].upper()  # A for (A)ttack, B for item from (B)ag
+            type = choice[0].upper()  # A for (A)ttack, B for consumable from (B)ag
             index = choice[1:]
             if type not in ['A', 'B']:
                 print('ERROR: first character should be A or B')
@@ -341,14 +335,14 @@ class Player(Character):
                 print('ERROR: you should have a number after the first character')
                 continue
 
-            if type.upper() == 'B':  # if the option choses is an item
+            if type.upper() == 'B':  # if the option choses is an consumable
                 if index >= len(self.bag) or index < 0:
                     # because we subtracted 1 from the player submitted index, we check index < 0 and not index < 1
-                    print('ERROR: index error, choose a valid number for item index')
+                    print('ERROR: index error, choose a valid number for consumable index')
                     continue
                 else:
-                    item = self.bag.pop(index)
-                    self.use_item(item)
+                    consumable = self.bag.pop(index)
+                    self.use_consumable(consumable)
                     os.system('cls')
                     self.show_fight_status()
                     self.show_fight_options()
@@ -369,7 +363,7 @@ class Player(Character):
 
             return choice
 
-    def do_fight_option(self, choice):  # actually do the move/ use the item the player choose
+    def do_fight_option(self, choice):  # actually do the move/ use the consumable the player choose
         if choice == 'pass':
             cprint('you decide to do nothing, and bide your time', 'green')
             return None
@@ -380,9 +374,24 @@ class Player(Character):
             move = self.moveset[index]
             move.use_move(self, self.opponents)
         elif choice['type'] == 'B':
-            print('ERROR: YOU DIDNT LOOP AFTER ACTIVATING THE ITEM')
+            print('ERROR: YOU DIDNT LOOP AFTER ACTIVATING THE Consumable')
         else:
             print('you fucked up your error handling dude')
+
+    def encounter_shop(self):
+
+        shop = Shop(customer=self)
+        player_action = ''
+        while player_action != 'leave':
+            self.show_healthbar()
+            self.show_manabar()
+            print('gold:', colored(str(self.gold), 'yellow'))
+            print('')
+            print('SHOP:')
+            shop.show_wares()
+            player_action = shop.buy_things()
+            os.system('cls')
+        self.next_shop = random.randint(5, 7)
 
     def start_battle(self):
         def mana_cost(x):
@@ -399,6 +408,7 @@ class Player(Character):
         self.ATK = self.base_ATK
         self.mana_regen = self.base_mana_regen
         self.evasion = self.base_evasion
+        self.DEF = self.base_DEF
 
         self.gold += Character.gold_from_battle
 
@@ -406,8 +416,13 @@ class Player(Character):
                                     'yellow'), 'from that encounter')
 
         Character.gold_from_battle = 0
+        self.next_shop -= 1
 
         print('you now have', colored(f'{self.gold} gold', 'yellow'))
+
+        drop = random.choice(Consumable.ALL_consumables)
+        self.equip(drop)
+        cprint(f'you found a {drop.name}', 'green')
 
         unfucked_input('press ented to continue: ')
         os.system('cls')
@@ -416,10 +431,11 @@ class Player(Character):
 class Enemy(Character):
     def __init__(self):
         super().__init__()
-        self.maxhp = int(self.base_maxhp * (random.uniform(0.8, 1.2))
+        kill_count = Character.player_character.kill_count
+        self.maxhp = int(self.base_maxhp * (random.uniform(0.8, 1.2) * (1 + (kill_count / 50)))
                          )  # some variance in max health
         self.hp = self.maxhp  # initially hp will be max hp
-        self.ATK = self.base_attack + random.randint(-1, 1)  # slightly varies the attack power
+        self.ATK = self.base_attack + random.randint(-3, 3)  # slightly varies the attack power
         self.gold = int(self.base_gold * random.uniform(0.8, 1.25))
         self.moveset = self.base_moveset
         self.newly_born = False
@@ -431,6 +447,7 @@ class Enemy(Character):
         oppponents_list.pop(index)
         print(colored(f'{self.name} died', 'red'))
         Character.gold_from_battle += self.gold
+        Character.player_character.kill_count += 1
     # removes the enemy from the list of opponentsthe player has to face
 
     def attack(self, player):
@@ -443,9 +460,9 @@ class Gremlin(Enemy):
     def __init__(self):
         self.name = 'Gremlin'
         self.base_maxhp = 50
-        self.base_attack = 2
-        self.evasion = 5
-        self.base_gold = 20
+        self.base_attack = 15
+        self.evasion = 0
+        self.base_gold = 40
         super().__init__()
 
 
@@ -453,9 +470,9 @@ class Bat(Enemy):
     def __init__(self):
         self.name = 'Bat'
         self.base_maxhp = 35
-        self.base_attack = 4
-        self.evasion = 15
-        self.base_gold = 10
+        self.base_attack = 20
+        self.evasion = 5
+        self.base_gold = 20
         super().__init__()
 
 
@@ -463,10 +480,10 @@ class Slime(Enemy):
     def __init__(self, has_split=False, maxhp=None, newly_born=False):
         self.name = 'Slime'
         self.base_maxhp = 80
-        self.base_attack = 2
+        self.base_attack = 10
         self.evasion = 0
         self.has_split = has_split
-        self.base_gold = 25
+        self.base_gold = 35
         super().__init__()
         if maxhp is None:
             pass
@@ -489,6 +506,8 @@ class Slime(Enemy):
             child2 = Slime(has_split=True, maxhp=self.hp, newly_born=True)
             child1.gold = 0
             child2.gold = 0
+            child1.ATK /= 2
+            child2.ATK /= 2
             player.opponents.extend([child1, child2])
             self.die(player.opponents)
             print('The slime died and split into 2 smaller slimes!')

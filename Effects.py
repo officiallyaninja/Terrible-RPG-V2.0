@@ -1,4 +1,6 @@
 from termcolor import cprint
+import random
+from Consumable import *
 
 
 class Effect():
@@ -18,7 +20,7 @@ class Effect():
 
 class MaxHpUp(Effect):
     def __init__(self, strength, permanent=False):
-        self.info_text = f'gained {strength} max HP'
+        self.info_text = f'+ {strength} max HP'
         self.strength = strength  # this is how much max hp is gained
         self.permanent = permanent
 
@@ -34,8 +36,8 @@ class MaxHpUp(Effect):
 
 
 class MaxHpDown(Effect):
-    def __init__(self, strength, permanent=True):
-        self.info_text = f'lost {strength} max HP'
+    def __init__(self, strength, permanent=False):
+        self.info_text = f'- {strength} max HP'
         self.strength = strength  # this is how much max hp is lost
         self.permanent = permanent
 
@@ -50,7 +52,7 @@ class MaxHpDown(Effect):
 
 class HealUp(Effect):
     def __init__(self, strength):
-        self.info_text = f'gained {strength} HP'
+        self.info_text = f'+ {strength} HP'
         self.strength = strength
 
     def trigger(self):
@@ -90,7 +92,7 @@ class ManaRegenUp(Effect):
 
 class ManaUp(Effect):
     def __init__(self, strength):
-        self.info_text = f'+{strength} Mana'
+        self.info_text = f'gained {strength} Mana'
         self.strength = strength
 
     def trigger(self):
@@ -101,13 +103,43 @@ class ManaUp(Effect):
 
 class MaxManaDown(Effect):
     def __init__(self, strength):
-        self.info_text = f'-{strength} Max Mana'
+        self.info_text = f'lost {strength} Max Mana'
         self.strength = strength
 
     def trigger(self):
         super().trigger()
         user.max_mana = max(0, user.max_mana - self.strength)
         user.mana = min(user.mana, user.max_mana)
+
+
+class MaxManaUp(Effect):
+    def __init__(self, strength, permanent=False):
+        self.info_text = f'gained{strength} Max Mana'
+        self.strength = strength
+        self.permanent = permanent
+
+    def trigger(self):
+        super().trigger()
+        user.max_mana += self.strength
+        user.mana += self.strength
+
+    def untrigger(self):
+        if not self.permanent:
+            user.max_mana = max(0, user.max_mana - self.strength)
+            user.mana = min(user.mana, user.max_mana)
+
+
+class DefenseUp(Effect):
+    def __init__(self, strength):
+        self.info_text = f'gained {strength} defense'
+        self.strength = strength
+
+    def trigger(self):
+        super().trigger()
+        user.DEF += self.strength
+
+    def untrigger(self):
+        user.DEF -= self.strength
 
 
 class Bonfire(Effect):
@@ -129,3 +161,47 @@ class Bonfire(Effect):
                 move.debuffs.append(
                     {'name': 'burning', 'duration': 3}
                 )
+
+
+class GetConsumables(Effect):
+    def __init__(self, number):
+        self.info_text = f'you recieve {number} consumables'
+        self.number = number
+
+    def trigger(self):
+        for i in range(0, self.number):
+            consumable = random.choice(Consumable.ALL_consumables)
+            user.equip(consumable)
+
+
+class WeakenEnemies(Effect):
+    def __init__(self, duration):
+        self.info_text = f'all enemies have been weakened for {duration} turns'
+        self.duration = duration
+
+    def trigger(self):
+        super().trigger()
+        for enemy in user.opponents:
+            enemy.apply_status({'name': 'Weakness', 'duration': self.duration})
+
+
+class BurnEnemies(Effect):
+    def __init__(self, duration):
+        self.info_text = f'all enemies have been burned for {duration} turns'
+        self.duration = duration
+
+    def trigger(self):
+        super().trigger()
+        for enemy in user.opponents:
+            enemy.apply_status({'name': 'burning', 'duration': self.duration})
+
+
+class DealDamage(Effect):
+    def __init__(self, strength):
+        self.info_text = f'dealt {strength} damage to all enemies'
+        self.strength = strength
+
+    def trigger(self):
+        super().trigger()
+        for enemy in user.opponents:
+            user.deal_damage(enemy, self.strength)

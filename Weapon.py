@@ -7,7 +7,7 @@ class Weapon(Artifact):
 
     def __init__(self, name, flavor_text, cost, damage_multiplier=1, moveset=[], equip_effects=[], battle_effects=[], turn_effects=[]):
         self.name = name
-        self.flavor_text = "lorem ipsum"
+        self.flavor_text = flavor_text
         self.cost = cost
 
         self.damage_multiplier = damage_multiplier
@@ -33,17 +33,26 @@ flaming_sword = Weapon(
     name='Flaming Sword',
     flavor_text='a sword that makes all your attacks burn your opponents',
     damage_multiplier=1.25,
-    moveset=[weak_strike],
+    moveset=[],
     battle_effects=[Bonfire()],
     cost=500
 )
 
 reapers_scythe = Weapon(
     name='The Reapers Scythe',
-    flavor_text='lose 40 Max HP on pickup, but gain awesome power',
+    flavor_text='PERMANENTLY lose 40 Max HP on pickup, but gain awesome power',
     damage_multiplier=2,
     moveset=[corrupted_healing, murder],
     equip_effects=[MaxHpDown(40)],
-    cost=2000
+    cost=1000
 
+)
+
+shield = Weapon(
+    name='the shield',
+    flavor_text='The best offense is a good defense',
+    damage_multiplier=1.1,
+    moveset=[shield_bash],
+    equip_effects=[DefenseUp(40)],
+    cost=750
 )

@@ -68,7 +68,7 @@ class Move():
             else:
                 dmg_multiplier = 1
 
-            dmg = int(((user.ATK) / 2) * (self.base_dmg) * (dmg_multiplier))
+            dmg = int(((user.ATK) / 10) * (self.base_dmg) * (dmg_multiplier))
             if user.has_status('Weakness'):
                 dmg = int(dmg * 0.75)
 
@@ -151,6 +151,7 @@ class Move():
                     print(colored(f'{user.name} missed {player.name}', 'green'))
                 else:
                     # cprint(f'{user.name} used {self.name} on {player.name}', 'green')
+                    dmg *= 1 - (min(player.DEF, 90) / 100)
                     user.deal_damage(player, dmg)
                     self.apply_debuffs(player)
                     player.show_healthbar()
@@ -176,24 +177,17 @@ move = Move(
 strike = Move(
     name='strike',
     flavor_text='a simple strike',
-    base_dmg=10,
+    base_dmg=15,
     AoE=False,
-    accuracy=95)
-
-weak_strike = Move(
-    name='weak strike',
-    flavor_text='a simple strike',
-    base_dmg=5,
-    AoE=False,
-    debuffs=[],
     accuracy=100)
 
 strong_strike = Move(
     name='strong strike',
-    flavor_text='a strong strike, very prone to missing',
-    base_dmg=20,
+    flavor_text='a strong strike',
+    base_dmg=25,
     AoE=False,
-    accuracy=60)
+    accuracy=100,
+    mana_cost=10)
 
 flame_blast = Move(
     name='flame blast',
@@ -201,46 +195,21 @@ flame_blast = Move(
     base_dmg=10,
     AoE=True,
     debuffs=[Burning],  # should be burning here
-    accuracy=50,
-    mana_cost=10)
+    accuracy=90,
+    mana_cost=15)
 
-sharp_shooter = Move(
-    name='Sharp shooter',
-    flavor_text='A magic attack that never misses, and is quite powerful',
-    base_dmg=20,
-    buffs=[],
-    debuffs=[],
-    AoE=False,
-    accuracy=200,
-    effects=[],
-    mana_cost=30,
-    learnable=True)
-
-hell_fire = Move(
-    name='Hell fire',
-    flavor_text='Rain fire from the heavens, destroying enemies and your self, deals 50 recoil damage',
-    base_dmg=30,
+earthquake = Move(
+    name='earthquake',
+    flavor_text='summon an earthquake that hits all enemies',
+    base_dmg=35,
     AoE=True,
-    accuracy=100,
-    effects=[Recoil(50)],
-    mana_cost=40,
-    debuffs=[
-        {'name': 'burning', 'duration': 3}
-    ])
+    accuracy=80,
+    mana_cost=40
+)
 
-gaias_blessing = Move(
-    name="Gaia's blessing",
-    flavor_text='heal 50 hp, and enemies cannot attack you for 1 turn',
-    base_dmg=0,
-    buffs=[
-        {'name': 'unhittable', 'duration': 1}
-    ],
-    debuffs=[],
-    AoE=False,
-    accuracy=200,
-    effects=[HealUp(50)],
-    mana_cost=50,
-    learnable=True)
+# weapon moves
+#####################
+# the reapers_scythe
 
 corrupted_healing = Move(
     name='Corrupted healing',
@@ -262,9 +231,73 @@ murder = Move(
     effects=[MaxManaDown(10)],
 )
 
+# the shield
+shield_bash = Move(
+    name='shield bash',
+    flavor_text='deal a decent bit of damage and weaken target enemy',
+    AoE=False,
+    base_dmg=20,
+    buffs=[],
+    debuffs=[Weakness],
+    mana_cost=0,
+    effects=[]
+)
+
+# LEARNABLE MOVES
+#######################################
+gaias_blessing = Move(
+    name="Gaia's blessing",
+    flavor_text='heal 50 hp, and enemies cannot attack you for 1 turn',
+    base_dmg=0,
+    buffs=[
+        {'name': 'unhittable', 'duration': 1}
+    ],
+    debuffs=[],
+    AoE=False,
+    accuracy=200,
+    effects=[HealUp(50)],
+    mana_cost=50,
+    learnable=True,
+    cost=250)
+
+sharp_shooter = Move(
+    name='Sharp shooter',
+    flavor_text='A strong magic attack that never misses, and is quite powerful',
+    base_dmg=30,
+    buffs=[],
+    debuffs=[],
+    AoE=False,
+    accuracy=200,
+    effects=[],
+    mana_cost=30,
+    learnable=True,
+    cost=50)
+
+hell_fire = Move(
+    name='Hell fire',
+    flavor_text='Rain fire from the heavens, destroying enemies and your self, deals 50 recoil damage',
+    base_dmg=30,
+    AoE=True,
+    accuracy=100,
+    effects=[Recoil(50)],
+    mana_cost=40,
+    debuffs=[{'name': 'burning', 'duration': 3}],
+    learnable=True,
+    cost=250)
+
+# ENEMY MOVES
+###########################
+
+weak_strike = Move(
+    name='weak strike',
+    flavor_text='a weak strike',
+    base_dmg=5,
+    AoE=False,
+    debuffs=[],
+    accuracy=90)
 
 starting_moveset = {
-    'Player': [strike, flame_blast, hell_fire, gaias_blessing],
+    'Player': [strike, strong_strike, flame_blast, earthquake],
     'Gremlin': [weak_strike],
     'Bat': [weak_strike],
     'Slime': [weak_strike]
