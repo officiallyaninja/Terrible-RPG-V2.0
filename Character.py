@@ -226,7 +226,7 @@ class Character():
         elif isinstance(thing_to_equip, Move):
             self.learn_move(thing_to_equip)
         else:
-            print('you done fucked up, you tried to equip something that isnt a weapn artifact or consumable')
+            print('you done fucked up, you tried to equip something that isnt a weapon artifact or consumable')
 
 
 class Player(Character):

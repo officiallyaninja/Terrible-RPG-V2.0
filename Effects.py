@@ -1,6 +1,5 @@
 from termcolor import cprint
 import random
-from Consumable import *
 
 
 class Effect():
@@ -163,15 +162,9 @@ class Bonfire(Effect):
                 )
 
 
-class GetConsumables(Effect):
-    def __init__(self, number):
-        self.info_text = f'you recieve {number} consumables'
-        self.number = number
+'''
 
-    def trigger(self):
-        for i in range(0, self.number):
-            consumable = random.choice(Consumable.ALL_consumables)
-            user.equip(consumable)
+'''
 
 
 class WeakenEnemies(Effect):

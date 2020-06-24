@@ -1,4 +1,5 @@
 from Effects import *
+from Consumable import GetConsumables
 
 
 class Artifact():

@@ -6,6 +6,10 @@ from Consumable import *
 from Weapon import *
 os.system('color')
 
+print("make sure you're running this in command line and not in python Idle")
+unfucked_input('press enter to continue')
+os.system('cls')
+
 
 player = Player()
 Character.player_character = player
@@ -39,7 +43,8 @@ while player.hp > 0:
         player.encounter_shop()
 
     player.generate_encounter()
-    battle_effects = False  # checks whether theres any battle effects to be triggered
+    # checks whether theres any battle effects to be triggered
+    battle_effects = False
     for artifact in player.artifacts:
         if len(artifact.battle_effects) > 0:
             battle_effects = True
@@ -84,8 +89,6 @@ while player.hp > 0:
     if player.hp > 0:
         player.end_battle()
 
-if player.hp > 0 and len(player.opponents) == 0:
-    print('hurray you won')
 if player.hp <= 0:
     print(colored('you died', 'red'))
     print('you killed a total of', colored(str(player.kill_count), 'red'), 'enemies')

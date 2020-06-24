@@ -90,3 +90,14 @@ molotov_cocktail = Consumable(
     effects=[BurnEnemies(3)],
     cost=50
 )
+
+
+class GetConsumables(Effect):
+    def __init__(self, number):
+        self.info_text = f'you recieve {number} consumables'
+        self.number = number
+
+    def trigger(self):
+        for i in range(0, self.number):
+            consumable = random.choice(Consumable.ALL_consumables)
+            user.equip(consumable)
