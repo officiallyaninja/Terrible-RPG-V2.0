@@ -448,7 +448,7 @@ class Enemy(Character):
         print(colored(f'{self.name} died', 'red'))
         Character.gold_from_battle += self.gold
         Character.player_character.kill_count += 1
-    # removes the enemy from the list of opponentsthe player has to face
+    # removes the enemy from the list of opponents the player has to face
 
     def attack(self, player):
         # the [0] is there because random.sample returns a list
